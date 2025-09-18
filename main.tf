@@ -41,7 +41,7 @@ module "aggregation" {
 }
 
 module "delivery_channel_target_s3" {
-  source = "./delivery-channe-target-s3"
+  source = "./delivery-channel-target-s3"
 
   aws_config_settings = var.aws_config_settings
   resource_tags       = var.resource_tags
