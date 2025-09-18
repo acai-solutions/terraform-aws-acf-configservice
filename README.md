@@ -150,7 +150,7 @@ No providers.
 | Name | Source | Version |
 |------|--------|---------|
 | <a name="module_aggregation"></a> [aggregation](#module\_aggregation) | ./aggregation | n/a |
-| <a name="module_delivery_channel_target_s3"></a> [delivery\_channel\_target\_s3](#module\_delivery\_channel\_target\_s3) | ./delivery-channe-target-s3 | n/a |
+| <a name="module_delivery_channel_target_s3"></a> [delivery\_channel\_target\_s3](#module\_delivery\_channel\_target\_s3) | ./delivery-channel-target-s3 | n/a |
 
 ## Resources
 
