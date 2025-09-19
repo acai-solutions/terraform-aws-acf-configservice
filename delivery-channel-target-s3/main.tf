@@ -74,7 +74,7 @@ data "aws_iam_policy_document" "aws_config_bucket_cmk" {
   override_policy_documents = local.s3_settings.kms_cmk.principal_permissions
 
   statement {
-    sid    = "RootFullAccess"
+    sid    = "PrincipalPermissions"
     effect = "Allow"
     principals {
       type        = "AWS"
@@ -82,20 +82,6 @@ data "aws_iam_policy_document" "aws_config_bucket_cmk" {
     }
     actions   = ["kms:*"]
     resources = ["*"]
-  }
-
-  dynamic "statement" {
-    for_each = local.s3_settings.kms_cmk.enable_iam_user_permissions != false ? [1] : []
-    content {
-      sid    = "EnableAccountAdmins"
-      effect = "Allow"
-      principals {
-        type        = "AWS"
-        identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
-      }
-      actions   = ["kms:*"]
-      resources = ["*"]
-    }
   }
 
   statement {
@@ -183,11 +169,18 @@ resource "aws_s3_bucket_lifecycle_configuration" "aws_config_bucket" {
   rule {
     id     = "Expiration"
     status = "Enabled"
-    expiration {
-      days = local.s3_settings.bucket_days_to_expiration
-    }
     abort_incomplete_multipart_upload {
       days_after_initiation = 7
+    }
+    dynamic "transition" {
+      for_each = local.s3_settings.days_to_glacier != -1 ? [1] : []
+      content {
+        days          = local.s3_settings.days_to_glacier
+        storage_class = "GLACIER"
+      }
+    }
+    expiration {
+      days = local.s3_settings.days_to_expiration
     }
   }
 }
@@ -259,14 +252,14 @@ resource "aws_s3_bucket" "log_access_bucket" {
   #  No Cross-Region Bucket replication up to now
   #checkov:skip=CKV2_AWS_62 : S3 buckets do not have event notifications enabled - LOW
   #  Not needed 
-  count         = local.s3_settings.bucket_access_s3_id == null ? 1 : 0
+  count         = local.s3_settings.bucket_access_logs_s3_id == null ? 1 : 0
   force_destroy = var.s3_delivery_bucket_force_destroy
   bucket        = "${aws_s3_bucket.aws_config_bucket.id}-access-logs"
   tags          = local.resource_tags
 }
 
 resource "aws_s3_bucket_public_access_block" "log_access_bucket" {
-  count                   = local.s3_settings.bucket_access_s3_id == null ? 1 : 0
+  count                   = local.s3_settings.bucket_access_logs_s3_id == null ? 1 : 0
   bucket                  = aws_s3_bucket.log_access_bucket[0].id
   block_public_acls       = true
   block_public_policy     = true
@@ -275,21 +268,21 @@ resource "aws_s3_bucket_public_access_block" "log_access_bucket" {
 }
 
 resource "aws_s3_bucket_versioning" "log_access_bucket" {
-  count  = local.s3_settings.bucket_access_s3_id == null ? 1 : 0
+  count  = local.s3_settings.bucket_access_logs_s3_id == null ? 1 : 0
   bucket = aws_s3_bucket.log_access_bucket[0].id
   versioning_configuration { status = "Enabled" }
 }
 
 resource "aws_s3_bucket_logging" "config_bucket_logging" {
   bucket        = aws_s3_bucket.aws_config_bucket.id
-  target_bucket = local.s3_settings.bucket_access_s3_id == null ? aws_s3_bucket.log_access_bucket[0].id : local.s3_settings.bucket_access_s3_id
+  target_bucket = local.s3_settings.bucket_access_logs_s3_id == null ? aws_s3_bucket.log_access_bucket[0].id : local.s3_settings.bucket_access_logs_s3_id
   target_prefix = "logs/${aws_s3_bucket.aws_config_bucket.id}/"
 }
 
 #tfsec:ignore:AVD-AWS-0088 Severity: HIGH Message: Bucket does not have encryption enabled
 #tfsec:ignore:AVD-AWS-0132 Severity: HIGH Message: Bucket does not encrypt data with a customer managed key. 
 resource "aws_s3_bucket_server_side_encryption_configuration" "log_access_bucket" {
-  count  = local.s3_settings.bucket_access_s3_id == null ? 1 : 0
+  count  = local.s3_settings.bucket_access_logs_s3_id == null ? 1 : 0
   bucket = aws_s3_bucket.log_access_bucket[0].id
   rule {
     apply_server_side_encryption_by_default {
@@ -300,11 +293,14 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "log_access_bucket
 }
 
 resource "aws_s3_bucket_lifecycle_configuration" "log_access_bucket" {
-  count  = local.s3_settings.bucket_access_s3_id == null ? 1 : 0
+  count  = local.s3_settings.bucket_access_logs_s3_id == null ? 1 : 0
   bucket = aws_s3_bucket.log_access_bucket[0].id
   rule {
     id     = "access-log-retention"
     status = "Enabled"
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 7
+    }
     dynamic "transition" {
       for_each = local.s3_settings.days_to_glacier != -1 ? [1] : []
       content {
@@ -312,9 +308,8 @@ resource "aws_s3_bucket_lifecycle_configuration" "log_access_bucket" {
         storage_class = "GLACIER"
       }
     }
-    abort_incomplete_multipart_upload {
-      days_after_initiation = 7
+    expiration {
+      days = local.s3_settings.days_to_expiration
     }
-    expiration { days = local.s3_settings.days_to_expiration }
   }
 }
