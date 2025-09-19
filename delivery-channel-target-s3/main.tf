@@ -128,6 +128,12 @@ resource "aws_kms_alias" "aws_config_bucket_cmk" {
 # ---------------------------------------------------------------------------------------------------------------------
 # ¦ AWS CONFIG AGGREGATOR BUCKET
 # ---------------------------------------------------------------------------------------------------------------------
+#tfsec:ignore: AVD-AWS-0086 Severity: HIGH Message: No public access block so not blocking public acls
+#  false-positive, see: resource "aws_s3_bucket_public_access_block" "aws_config_bucket"
+#tfsec:ignore: AVD-AWS-0087 Severity: HIGH Message: No public access block so not blocking public policies
+#  false-positive, see: resource "aws_s3_bucket_public_access_block" "aws_config_bucket"
+#tfsec:ignore:AVD-AWS-0091 Severity: HIGH Message: No public access block so not blocking public acl
+#  false-positive, see: resource "aws_s3_bucket_public_access_block" "aws_config_bucket"
 resource "aws_s3_bucket" "aws_config_bucket" {
   #checkov:skip=CKV_AWS_144 : No Cross-Region Bucket replication 
   #checkov:skip=CKV_AWS_145  
@@ -237,7 +243,13 @@ data "aws_iam_policy_document" "awsconfig_bucket" {
 # ¦ AWS CONFIG AGGREGATOR ACCE LOGS BUCKET
 # ---------------------------------------------------------------------------------------------------------------------
 #tfsec:ignore:avd-aws-0089: Ensures S3 bucket logging is enabled for S3 buckets
-#tfsec:ignore:avd-aws-0090
+#  This is the access-log bucket
+#tfsec:ignore: AVD-AWS-0086 Severity: HIGH Message: No public access block so not blocking public acls
+#  false-positive, see: resource "aws_s3_bucket_public_access_block" "log_access_bucket"
+#tfsec:ignore: AVD-AWS-0087 Severity: HIGH Message: No public access block so not blocking public policies
+#  false-positive, see: resource "aws_s3_bucket_public_access_block" "log_access_bucket"
+#tfsec:ignore:AVD-AWS-0091 Severity: HIGH Message: No public access block so not blocking public acl
+#  false-positive, see: resource "aws_s3_bucket_public_access_block" "log_access_bucket"
 resource "aws_s3_bucket" "log_access_bucket" {
   count         = local.s3_settings.bucket_access_s3_id == null ? 1 : 0
   force_destroy = var.s3_delivery_bucket_force_destroy
