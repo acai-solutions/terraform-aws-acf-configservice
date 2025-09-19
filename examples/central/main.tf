@@ -49,15 +49,13 @@ locals {
     }
     delivery_channel_target = {
       central_s3 = {
-        bucket_name = format("aws-config-logs-%s", data.aws_caller_identity.logging.account_id)
+        bucket_name        = format("aws-config-logs-%s", data.aws_caller_identity.logging.account_id)
+        days_to_glacier    = 90
+        days_to_expiration = 360
         kms_cmk = var.bucket_encryption == "CMK" ? {
-          key_alias                   = "aws-config-recorder-logs-key"
-          deletion_window_in_days     = 30
-          additional_kms_cmk_grants   = ""
-          enable_iam_user_permissions = true
+          key_alias               = "aws-config-recorder-logs-key"
+          deletion_window_in_days = 30
         } : null
-        bucket_days_to_glacier    = 90
-        bucket_days_to_expiration = 360
       }
     }
     account_baseline = {
