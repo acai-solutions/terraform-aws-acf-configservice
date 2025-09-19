@@ -141,10 +141,10 @@ resource "aws_kms_alias" "aws_config_bucket_cmk" {
 #tfsec:ignore:AVD-AWS-0091 Severity: HIGH Message: No public access block so not blocking public acl
 #  false-positive, see: resource "aws_s3_bucket_public_access_block" "aws_config_bucket"
 resource "aws_s3_bucket" "aws_config_bucket" {
-  #checkov:skip=CKV_AWS_144 : No Cross-Region Bucket replication 
-  #checkov:skip=CKV_AWS_145  
-  #checkov:skip=CKV2_AWS_62  
-  #checkov:skip=CKV_AWS_19  
+  #checkov:skip=CKV_AWS_144 : Ensure that S3 bucket has cross-region replication enabled - LOW
+  #  No Cross-Region Bucket replication up to now
+  #checkov:skip=CKV2_AWS_62 : S3 buckets do not have event notifications enabled - LOW
+  #  Not needed 
   bucket        = local.s3_settings.bucket_name
   force_destroy = var.s3_delivery_bucket_force_destroy
   tags          = local.resource_tags
@@ -179,7 +179,6 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "aws_config_bucket
 }
 
 resource "aws_s3_bucket_lifecycle_configuration" "aws_config_bucket" {
-  #checkov:skip=CKV_AWS_300 : No Multipart Upload
   bucket = aws_s3_bucket.aws_config_bucket.id
   rule {
     id     = "Expiration"
@@ -187,8 +186,8 @@ resource "aws_s3_bucket_lifecycle_configuration" "aws_config_bucket" {
     expiration {
       days = local.s3_settings.bucket_days_to_expiration
     }
-    noncurrent_version_expiration {
-      noncurrent_days = 1
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 7
     }
   }
 }
@@ -256,6 +255,10 @@ data "aws_iam_policy_document" "awsconfig_bucket" {
 #tfsec:ignore:AVD-AWS-0091 Severity: HIGH Message: No public access block so not blocking public acl
 #  false-positive, see: resource "aws_s3_bucket_public_access_block" "log_access_bucket"
 resource "aws_s3_bucket" "log_access_bucket" {
+  #checkov:skip=CKV_AWS_144 : Ensure that S3 bucket has cross-region replication enabled - LOW
+  #  No Cross-Region Bucket replication up to now
+  #checkov:skip=CKV2_AWS_62 : S3 buckets do not have event notifications enabled - LOW
+  #  Not needed 
   count         = local.s3_settings.bucket_access_s3_id == null ? 1 : 0
   force_destroy = var.s3_delivery_bucket_force_destroy
   bucket        = "${aws_s3_bucket.aws_config_bucket.id}-access-logs"
@@ -308,6 +311,9 @@ resource "aws_s3_bucket_lifecycle_configuration" "log_access_bucket" {
         days          = local.s3_settings.days_to_glacier
         storage_class = "GLACIER"
       }
+    }
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 7
     }
     expiration { days = local.s3_settings.days_to_expiration }
   }
