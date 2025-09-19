@@ -158,12 +158,14 @@ resource "aws_s3_bucket_versioning" "aws_config_bucket" {
 resource "aws_s3_bucket_server_side_encryption_configuration" "aws_config_bucket" {
   bucket = aws_s3_bucket.aws_config_bucket.id
 
-  rule {
-    apply_server_side_encryption_by_default {
-      sse_algorithm     = local.kms_cmk ? "aws:kms" : "AES256"
-      kms_master_key_id = local.kms_cmk ? aws_kms_key.aws_config_bucket_cmk[0].id : null
+  dynamic "rule" {
+    for_each = [1]
+    content {
+      apply_server_side_encryption_by_default {
+        sse_algorithm     = local.kms_cmk ? "aws:kms" : "AES256"
+        kms_master_key_id = local.kms_cmk ? aws_kms_key.aws_config_bucket_cmk[0].id : null
+      }
     }
-
   }
 }
 
@@ -229,6 +231,12 @@ data "aws_iam_policy_document" "awsconfig_bucket" {
       variable = "aws:SourceOrgID"
       values   = [data.aws_organizations_organization.current.id]
     }
+    # Optional tighter scoping:
+    # condition {
+    #   test     = "StringEquals"
+    #   variable = "aws:SourceAccount"
+    #   values   = [data.aws_caller_identity.current.account_id]
+    # }
   }
 }
 
@@ -246,7 +254,7 @@ resource "aws_s3_bucket" "log_access_bucket" {
 }
 
 resource "aws_s3_bucket_public_access_block" "log_access_bucket" {
-  count                   = local.s3_settings.bucket_access_s3_id == null ? 1 : 0
+  count = local.s3_settings.bucket_access_s3_id == null ? 1 : 0
   bucket                  = aws_s3_bucket.log_access_bucket[0].id
   block_public_acls       = true
   block_public_policy     = true
@@ -255,7 +263,7 @@ resource "aws_s3_bucket_public_access_block" "log_access_bucket" {
 }
 
 resource "aws_s3_bucket_versioning" "log_access_bucket" {
-  count  = local.s3_settings.bucket_access_s3_id == null ? 1 : 0
+  count = local.s3_settings.bucket_access_s3_id == null ? 1 : 0
   bucket = aws_s3_bucket.log_access_bucket[0].id
   versioning_configuration { status = "Enabled" }
 }
@@ -269,10 +277,13 @@ resource "aws_s3_bucket_logging" "config_bucket_logging" {
 resource "aws_s3_bucket_server_side_encryption_configuration" "log_access_bucket" {
   count  = local.s3_settings.bucket_access_s3_id == null ? 1 : 0
   bucket = aws_s3_bucket.log_access_bucket[0].id
-  rule {
-    apply_server_side_encryption_by_default {
-      sse_algorithm     = local.kms_cmk ? "aws:kms" : "AES256"
-      kms_master_key_id = local.kms_cmk ? aws_kms_key.aws_config_bucket_cmk[0].id : null
+  dynamic "rule" {
+    for_each = [1]
+    content {
+      apply_server_side_encryption_by_default {
+        sse_algorithm     = local.kms_cmk ? "aws:kms" : "AES256"
+        kms_master_key_id = local.kms_cmk ? aws_kms_key.aws_config_bucket_cmk[0].id : null
+      }
     }
   }
 }

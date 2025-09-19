@@ -14,15 +14,16 @@ variable "aws_config_settings" {
   type = object({
     delivery_channel_target = object({
       central_s3 = object({
-        bucket_name = string
+        bucket_name              = string
+        days_to_glacier          = optional(number, -1)
+        days_to_expiration       = number
+        bucket_access_logs_s3_id = optional(string, null) # Provide bucket namne, in case a logs bucket already exists
         kms_cmk = optional(object({
-          key_alias                   = optional(string, "aws-config-recorder-logs-key")
-          deletion_window_in_days     = optional(number, 30)
-          additional_kms_cmk_grants   = optional(string, null)
-          enable_iam_user_permissions = optional(bool, true)
+          key_alias                 = optional(string, "aws-config-recorder-logs-key")
+          deletion_window_in_days   = optional(number, 30)
+          additional_kms_cmk_grants = optional(list(string), null)
+          principal_permissions     = optional(list(string), null) # should override the statement_id 'PrincipalPermissions'
         }), null)
-        bucket_days_to_glacier    = optional(number, 30)
-        bucket_days_to_expiration = optional(number, 180)
       })
     })
     account_baseline = object({
