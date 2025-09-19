@@ -254,7 +254,7 @@ resource "aws_s3_bucket" "log_access_bucket" {
 }
 
 resource "aws_s3_bucket_public_access_block" "log_access_bucket" {
-  count = local.s3_settings.bucket_access_s3_id == null ? 1 : 0
+  count                   = local.s3_settings.bucket_access_s3_id == null ? 1 : 0
   bucket                  = aws_s3_bucket.log_access_bucket[0].id
   block_public_acls       = true
   block_public_policy     = true
@@ -263,7 +263,7 @@ resource "aws_s3_bucket_public_access_block" "log_access_bucket" {
 }
 
 resource "aws_s3_bucket_versioning" "log_access_bucket" {
-  count = local.s3_settings.bucket_access_s3_id == null ? 1 : 0
+  count  = local.s3_settings.bucket_access_s3_id == null ? 1 : 0
   bucket = aws_s3_bucket.log_access_bucket[0].id
   versioning_configuration { status = "Enabled" }
 }
