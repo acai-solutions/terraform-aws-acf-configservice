@@ -62,6 +62,12 @@ resource "aws_kms_key" "aws_config_bucket_cmk" {
 
 # https://docs.aws.amazon.com/config/latest/developerguide/s3-kms-key-policy.html
 data "aws_iam_policy_document" "aws_config_bucket_cmk" {
+  #checkov:skip=CKV_AWS_109 : Ensure IAM policies does not allow permissions management / resource exposure without constraints
+  #  Resource policy
+  #checkov:skip=CKV_AWS_111 : Ensure IAM policies does not allow write access without constraints
+  #  Resource policy
+  #checkov:skip=CKV_AWS_356 : Ensure no IAM policies documents allow "*" as a statement's resource for restrictable actions
+  #  Resource policy  
   count = local.kms_cmk ? 1 : 0
 
   source_policy_documents   = local.s3_settings.kms_cmk.additional_kms_cmk_grants
@@ -169,7 +175,6 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "aws_config_bucket
       sse_algorithm     = local.kms_cmk ? "aws:kms" : "AES256"
       kms_master_key_id = local.kms_cmk ? aws_kms_key.aws_config_bucket_cmk[0].id : null
     }
-
   }
 }
 
@@ -278,6 +283,8 @@ resource "aws_s3_bucket_logging" "config_bucket_logging" {
   target_prefix = "logs/${aws_s3_bucket.aws_config_bucket.id}/"
 }
 
+#tfsec:ignore:AVD-AWS-0088 Severity: HIGH Message: Bucket does not have encryption enabled
+#tfsec:ignore:AVD-AWS-0132 Severity: HIGH Message: Bucket does not encrypt data with a customer managed key. 
 resource "aws_s3_bucket_server_side_encryption_configuration" "log_access_bucket" {
   count  = local.s3_settings.bucket_access_s3_id == null ? 1 : 0
   bucket = aws_s3_bucket.log_access_bucket[0].id
