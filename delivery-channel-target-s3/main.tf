@@ -40,7 +40,7 @@ locals {
       module_name     = "terraform-aws-acf-configservice",
       module_source   = "github.com/acai-consulting/terraform-aws-acf-configservice",
       module_feature  = "delivery-chnl-target-s3",
-      module_version  = /*inject_version_start*/ "1.0.3" /*inject_version_end*/
+      module_version  = /*inject_version_start*/ "1.1.0" /*inject_version_end*/
     }
   )
   s3_settings = var.aws_config_settings.delivery_channel_target.central_s3
