@@ -1,0 +1,17 @@
+terraform import module.${tf_module_name}.aws_iam_role.aws_config_role_${lower(replace(primary_region, "-", "_"))} ${config_iam_role_name}
+
+%{ for region in all_regions ~}
+# Importing ${region} 
+# Get AWS Config Recorder via AWS CLI
+aws configservice describe-configuration-recorders --query "ConfigurationRecorders[*].name" --region ${lower(region)} --profile member_session --output text -> $CONFIG_RECORDER_NAME_${upper(replace(region, "-", "_"))} 
+# Import AWS Config Recorder to terraform state
+terraform import module.${tf_module_name}.aws_config_configuration_recorder.aws_config_recorder_${lower(replace(region, "-", "_"))} $CONFIG_RECORDER_NAME_${upper(replace(region, "-", "_"))} 
+%{ if config_s3_delivery == true ~}
+# Get AWS Config Recorder via AWS CLI
+aws configservice describe-delivery-channels --query "DeliveryChannels[*].name" --region ${lower(region)} --profile member_session --output text -> $CONFIG_DELIVERY_CHANNEL_${upper(replace(region, "-", "_"))} 
+# Import AWS Config Recorder to terraform state
+terraform import module.${tf_module_name}.aws_config_delivery_channel.aws_config_recorder_${lower(replace(region, "-", "_"))} $CONFIG_DELIVERY_CHANNEL_${upper(replace(region, "-", "_"))} 
+%{ endif ~}
+terraform import module.${tf_module_name}.aws_config_configuration_recorder_status.aws_config_recorder_${lower(replace(region, "-", "_"))} $CONFIG_RECORDER_NAME_${upper(replace(region, "-", "_"))} 
+
+%{ endfor ~}
