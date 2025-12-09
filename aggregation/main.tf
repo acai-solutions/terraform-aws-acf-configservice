@@ -30,28 +30,12 @@ data "aws_caller_identity" "current" {}
 
 
 # ---------------------------------------------------------------------------------------------------------------------
-# ¦ LOCALS
-# ---------------------------------------------------------------------------------------------------------------------
-locals {
-  resource_tags = merge(
-    var.resource_tags,
-    {
-      "module_provider" = "ACAI GmbH",
-      "module_name"     = "terraform-aws-acf-configservice",
-      "module_source"   = "github.com/acai-consulting/terraform-aws-acf-configservice",
-      "module_feature"  = "aggregation",
-      "module_version"  = /*inject_version_start*/ "1.1.0" /*inject_version_end*/
-    }
-  )
-}
-
-
-# ---------------------------------------------------------------------------------------------------------------------
 # ¦ AWS CONFIG AGGREGATOR ROLE
 # ---------------------------------------------------------------------------------------------------------------------
 resource "aws_iam_role" "aws_config_aggregator_role" {
   name               = var.aws_config_settings.aggregation.aggregator_role_name
   assume_role_policy = data.aws_iam_policy_document.aws_config_aggregator_role_trust.json
+  tags               = var.resource_tags
 }
 
 data "aws_iam_policy_document" "aws_config_aggregator_role_trust" {
@@ -81,6 +65,7 @@ resource "aws_config_configuration_aggregator" "aws_config_aggregator" {
     all_regions = true
     role_arn    = aws_iam_role.aws_config_aggregator_role.arn
   }
+  tags = var.resource_tags
   depends_on = [
     aws_iam_role_policy_attachment.aws_config_aggregator_role_permissions
   ]

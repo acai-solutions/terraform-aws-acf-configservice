@@ -33,16 +33,6 @@ data "aws_organizations_organization" "current" {}
 # ¦ LOCALS
 # ---------------------------------------------------------------------------------------------------------------------
 locals {
-  resource_tags = merge(
-    var.resource_tags,
-    {
-      module_provider = "ACAI GmbH",
-      module_name     = "terraform-aws-acf-configservice",
-      module_source   = "github.com/acai-consulting/terraform-aws-acf-configservice",
-      module_feature  = "delivery-chnl-target-s3",
-      module_version  = /*inject_version_start*/ "1.1.0" /*inject_version_end*/
-    }
-  )
   s3_settings = var.aws_config_settings.delivery_channel_target.central_s3
   kms_cmk     = local.s3_settings.kms_cmk != null
 }
@@ -57,7 +47,7 @@ resource "aws_kms_key" "aws_config_bucket_cmk" {
   deletion_window_in_days = local.s3_settings.kms_cmk.deletion_window_in_days
   enable_key_rotation     = true
   policy                  = data.aws_iam_policy_document.aws_config_bucket_cmk[0].json
-  tags                    = local.resource_tags
+  tags                    = var.resource_tags
 }
 
 # https://docs.aws.amazon.com/config/latest/developerguide/s3-kms-key-policy.html
@@ -133,7 +123,7 @@ resource "aws_s3_bucket" "aws_config_bucket" {
   #  Not needed 
   bucket        = local.s3_settings.bucket_name
   force_destroy = var.s3_delivery_bucket_force_destroy
-  tags          = local.resource_tags
+  tags          = var.resource_tags
 }
 
 resource "aws_s3_bucket_public_access_block" "aws_config_bucket" {
@@ -255,7 +245,7 @@ resource "aws_s3_bucket" "log_access_bucket" {
   count         = local.s3_settings.bucket_access_logs_s3_id == null ? 1 : 0
   force_destroy = var.s3_delivery_bucket_force_destroy
   bucket        = "${aws_s3_bucket.aws_config_bucket.id}-access-logs"
-  tags          = local.resource_tags
+  tags          = var.resource_tags
 }
 
 resource "aws_s3_bucket_public_access_block" "log_access_bucket" {
