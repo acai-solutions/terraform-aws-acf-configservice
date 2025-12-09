@@ -42,9 +42,8 @@ locals {
 }
 
 # ---------------------------------------------------------------------------------------------------------------------
-# ¦ DATA PREPARATION
+# ¦ MODULE VERSION
 # ---------------------------------------------------------------------------------------------------------------------
-
 resource "aws_ssm_parameter" "product_version" {
   #checkov:skip=CKV2_AWS_34: AWS SSM Parameter should be Encrypted not required for module version
   name           = "acai/acf/configservice/productversion"
