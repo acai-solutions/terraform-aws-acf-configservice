@@ -160,7 +160,7 @@ module "provisio_core_baseling" {
 
 | Name | Type |
 |------|------|
-| [aws_ssm_parameter.product_version](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
+| [aws_ssm_parameter.module_version](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 
 ## Inputs
 
