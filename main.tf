@@ -28,6 +28,32 @@ terraform {
 }
 
 # ---------------------------------------------------------------------------------------------------------------------
+# ¦ LOCALS
+# ---------------------------------------------------------------------------------------------------------------------
+locals {
+  resource_tags = merge(
+    var.resource_tags,
+    {
+      "module_provider" = "ACAI GmbH",
+      "module_name"     = "terraform-aws-acf-configservice",
+      "module_source"   = "github.com/acai-solutions/terraform-aws-acf-configservice"
+    }
+  )
+}
+
+# ---------------------------------------------------------------------------------------------------------------------
+# ¦ MODULE VERSION
+# ---------------------------------------------------------------------------------------------------------------------
+resource "aws_ssm_parameter" "module_version" {
+  #checkov:skip=CKV2_AWS_34: AWS SSM Parameter should be Encrypted not required for module version
+  name           = "/acai/acf/configservice/productversion"
+  type           = "String"
+  insecure_value = /*inject_version_start*/ "1.1.1" /*inject_version_end*/
+
+  tags = local.resource_tags
+}
+
+# ---------------------------------------------------------------------------------------------------------------------
 # ¦ CALL SUB-MODULES
 # ---------------------------------------------------------------------------------------------------------------------
 module "aggregation" {

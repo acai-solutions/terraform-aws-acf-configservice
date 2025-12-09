@@ -30,40 +30,42 @@ Define the AWS Config settings:
 
 ```hcl
 # ¦ security - aws_config
-aws_config = {
-  aggregation = {
-    aggregator_name        = "aws-config-aggregator"
-    aggregator_role_name   = "aws-config-aggregator-role"
-    aggregation_account_id = try(var.aws_config_configuration.aggregation.aggregation_account_id, local.core_accounts.security) 
-  }
-  delivery_channel_target = {    
-    central_s3 = {
-      bucket_name               = format("aws-config-logs-%s", local.core_accounts.logging)
-      kms_cmk = {
-        key_alias                   = "aws-config-recorder-logs-key"
-        deletion_window_in_days     = 30
-        additional_kms_cmk_grants   = ""
-        enable_iam_user_permissions = true
-        arn = try(var.aws_config_configuration.delivery_channel_target.central_s3.kms_cmk.arn, null)
+locals ={
+  aws_config_settings = {
+    aggregation = {
+      aggregator_name        = "aws-config-aggregator"
+      aggregator_role_name   = "aws-config-aggregator-role"
+      aggregation_account_id = try(var.aws_config_configuration.aggregation.aggregation_account_id, local.core_accounts.security) 
+    }
+    delivery_channel_target = {    
+      central_s3 = {
+        bucket_name               = format("aws-config-logs-%s", local.core_accounts.logging)
+        kms_cmk = {
+          key_alias                   = "aws-config-recorder-logs-key"
+          deletion_window_in_days     = 30
+          additional_kms_cmk_grants   = ""
+          enable_iam_user_permissions = true
+          arn = try(var.aws_config_configuration.delivery_channel_target.central_s3.kms_cmk.arn, null)
+        }
+        bucket_days_to_glacier    = 90
+        bucket_days_to_expiration = 360
       }
-      bucket_days_to_glacier    = 90
-      bucket_days_to_expiration = 360
+    }
+    account_baseline = {
+      iam_role_name         = "aws-config-recorder-role"
+      iam_role_path         = "/"
+      recorder_name         = "aws-config-recorder"
+      delivery_channel_name = "aws-config-recorder-delivery-channel"
     }
   }
-  account_baseline = {
-    iam_role_name         = "aws-config-recorder-role"
-    iam_role_path         = "/"
-    recorder_name         = "aws-config-recorder"
-    delivery_channel_name = "aws-config-recorder-delivery-channel"
-  }
-}
+} 
 ```
 
 Provision the central aggregator to e.g. Core Security:
 
 ```hcl
 module "aggregation" {
-  source = "git::https://github.com/acai-solutions/terraform-aws-acf-configservice.git//aggregation?ref=1.0.3"
+  source = "git::https://github.com/acai-solutions/terraform-aws-acf-configservice.git//aggregation?ref=1.1.0"
 
   aws_config_settings = local.aws_config_settings
   providers = {
@@ -76,7 +78,7 @@ Provision the central delivery bucket to e.g. Core Logging:
 
 ```hcl
 module "s3_delivery_channel" {
-  source = "git::https://github.com/acai-solutions/terraform-aws-acf-configservice.git//delivery-channel-target-s3?ref=1.0.3"
+  source = "git::https://github.com/acai-solutions/terraform-aws-acf-configservice.git//delivery-channel-target-s3?ref=1.1.0"
 
   aws_config_settings = local.aws_config_settings
   providers = {
@@ -89,7 +91,7 @@ Provision the member resources with ACAI PROVISIO:
 
 ```hcl
 module "aws_config_service" {
-  source = "git::https://github.com/acai-solutions/terraform-aws-acf-configservice.git//member/acai-provisio?ref=1.0.3"
+  source = "git::https://github.com/acai-solutions/terraform-aws-acf-configservice.git//member/acai-provisio?ref=1.1.0"
 
   provisio_settings = {
     provisio_regions = local.regions_settings
@@ -143,7 +145,9 @@ module "provisio_core_baseling" {
 
 ## Providers
 
-No providers.
+| Name | Version |
+|------|---------|
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.0 |
 
 ## Modules
 
@@ -154,7 +158,9 @@ No providers.
 
 ## Resources
 
-No resources.
+| Name | Type |
+|------|------|
+| [aws_ssm_parameter.module_version](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 
 ## Inputs
 
@@ -189,7 +195,7 @@ See [LICENSE][license-url] for full details.
 [acai-shield]: https://img.shields.io/badge/maintained_by-acai.gmbh-CB224B?style=flat
 [acai-docs-shield]: https://img.shields.io/badge/documentation-docs.acai.gmbh-CB224B?style=flat
 [acai-url]: https://acai.gmbh
-[acai-docs-url]: https://docs.acai.gmbh
+[acai-docs-url]: https://docs.acai.gmbh/solution-acf/10_overview/
 [module-version-shield]: https://img.shields.io/badge/module_version-1.1.0-CB224B?style=flat
 [module-release-url]: https://github.com/acai-solutions/terraform-aws-acf-configservice/releases
 [terraform-version-shield]: https://img.shields.io/badge/tf-%3E%3D1.3.10-blue.svg?style=flat&color=blueviolet
