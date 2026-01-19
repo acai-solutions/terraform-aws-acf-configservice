@@ -48,7 +48,7 @@ resource "aws_ssm_parameter" "module_version" {
   #checkov:skip=CKV2_AWS_34: AWS SSM Parameter should be Encrypted not required for module version
   name           = "/acai/acf/configservice/productversion"
   type           = "String"
-  insecure_value = /*inject_version_start*/ "1.1.1" /*inject_version_end*/
+  insecure_value = /*inject_version_start*/ "1.2.0" /*inject_version_end*/
 
   tags = local.resource_tags
 }

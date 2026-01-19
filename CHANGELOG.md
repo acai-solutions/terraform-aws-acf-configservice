@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0](https://github.com/acai-solutions/terraform-aws-acf-configservice/compare/1.1.1...1.2.0) (2026-01-19)
+
+
+### Features
+
+* new PROVISIO 1.5 ([#3](https://github.com/acai-solutions/terraform-aws-acf-configservice/issues/3)) ([5cb9d94](https://github.com/acai-solutions/terraform-aws-acf-configservice/commit/5cb9d94dafe1c59d55f361cfdbddd3a2874e8530))
+
 ## [1.1.1](https://github.com/acai-solutions/terraform-aws-acf-configservice/compare/1.1.0...1.1.1) (2025-12-09)
 
 

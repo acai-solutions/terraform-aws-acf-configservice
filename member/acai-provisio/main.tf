@@ -33,7 +33,7 @@ locals {
         "module_name"     = "terraform-aws-acf-configservice",
         "module_source"   = "github.com/acai-solutions/terraform-aws-acf-configservice",
         "module_feature"  = "member",
-        "module_version"  = /*inject_version_start*/ "1.1.1" /*inject_version_end*/
+        "module_version"  = /*inject_version_start*/ "1.2.0" /*inject_version_end*/
       }
     )
   })
