@@ -35,10 +35,14 @@ locals {
 
   delivery_target_s3 = try(var.aws_config_settings.delivery_channel_target.central_s3, null) != null
   bucket_kms_cmk_arn = try(var.aws_config_settings.delivery_channel_target.central_s3.kms_cmk.arn, "")
-  all_regions        = distinct(concat([var.provisio_settings.provisio_regions.primary_region], var.provisio_settings.provisio_regions.secondary_regions))
-  tf_module_name     = replace(var.provisio_settings.override_module_name == null ? var.provisio_settings.provisio_package_name : var.provisio_settings.override_module_name, "-", "_")
 
-  provisio_package_files = merge(
+  all_regions = sort(distinct(concat(
+    [var.provisio_settings.provisio_regions.primary_region],
+    var.provisio_settings.provisio_regions.secondary_regions
+  )))
+  tf_module_name = replace(var.provisio_settings.override_module_name == null ? var.provisio_settings.provisio_package_name : var.provisio_settings.override_module_name, "-", "_")
+
+  package_files = merge(
     var.provisio_settings.import_resources ? ({
       "import.part" = templatefile("${path.module}/templates/import.part.tftpl", {
         tf_module_name                  = local.tf_module_name
@@ -69,8 +73,8 @@ locals {
       })
       "requirements.tf" = templatefile("${path.module}/templates/requirements.tf.tftpl", {
         all_regions          = local.all_regions
-        terraform_version    = ">= 1.3.10",
-        provider_aws_version = ">= 4.00",
+        terraform_version    = var.provisio_settings.terraform_version,
+        provider_aws_version = var.provisio_settings.provider_aws_version,
       })
     }
   )
