@@ -46,7 +46,7 @@ locals {
     var.provisio_settings.import_resources ? ({
       "import.part" = templatefile("${path.module}/templates/import.part.tftpl", {
         tf_module_name                  = local.tf_module_name
-        primary_region                  = var.provisio_settings.provisio_regions.primary_region
+        primary_region                  = var.provisio_settings.target_regions.primary_region
         all_regions                     = local.all_regions
         config_iam_role_name            = var.aws_config_settings.account_baseline.iam_role_name
         config_recorder_name            = var.aws_config_settings.account_baseline.recorder_name
@@ -58,8 +58,8 @@ locals {
     }),
     {
       "main.tf" = templatefile("${path.module}/templates/main.tf.tftpl", {
-        primary_region                         = var.provisio_settings.provisio_regions.primary_region
-        secondary_regions                      = var.provisio_settings.provisio_regions.secondary_regions
+        primary_region                         = var.provisio_settings.target_regions.primary_region
+        secondary_regions                      = var.provisio_settings.target_regions.secondary_regions
         aggregation_account_id                 = var.aws_config_settings.aggregation.aggregation_account_id
         config_iam_role_name                   = var.aws_config_settings.account_baseline.iam_role_name
         config_iam_role_path                   = var.aws_config_settings.account_baseline.iam_role_path
