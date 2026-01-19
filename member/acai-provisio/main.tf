@@ -37,10 +37,10 @@ locals {
   bucket_kms_cmk_arn = try(var.aws_config_settings.delivery_channel_target.central_s3.kms_cmk.arn, "")
 
   all_regions = sort(distinct(concat(
-    [var.provisio_settings.provisio_regions.primary_region],
-    var.provisio_settings.provisio_regions.secondary_regions
+    [var.provisio_settings.target_regions.primary_region],
+    var.provisio_settings.target_regions.secondary_regions
   )))
-  tf_module_name = replace(var.provisio_settings.override_module_name == null ? var.provisio_settings.provisio_package_name : var.provisio_settings.override_module_name, "-", "_")
+  tf_module_name = replace(var.provisio_settings.override_module_name == null ? var.provisio_settings.package_name : var.provisio_settings.override_module_name, "-", "_")
 
   package_files = merge(
     var.provisio_settings.import_resources ? ({

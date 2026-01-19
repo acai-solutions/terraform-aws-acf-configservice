@@ -106,8 +106,8 @@ locals {
   package_deployment = [
     {
       deployment_name = "account-baselining-default"
-      provisio_package_names = [
-        module.aws_config_service.provisio_package_name,
+      package_names = [
+        module.aws_config_service.package_name,
       ]
     }
   ]
