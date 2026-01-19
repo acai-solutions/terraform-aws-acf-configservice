@@ -12,16 +12,18 @@
 variable "provisio_settings" {
   description = "ACAI PROVISIO settings"
   type = object({
-    provisio_package_name = optional(string, "aws-config")
-    override_module_name  = optional(string, null)
-    provisio_regions = object({
+    package_name         = optional(string, "aws-config")
+    override_module_name = optional(string, null)
+    terraform_version    = optional(string, ">= 1.3.10")
+    provider_aws_version = optional(string, ">= 4.00")
+    target_regions = object({
       primary_region    = string
       secondary_regions = list(string)
     })
     import_resources = optional(bool, false)
   })
   validation {
-    condition     = !contains(var.provisio_settings.provisio_regions.secondary_regions, var.provisio_settings.provisio_regions.primary_region)
+    condition     = !contains(var.provisio_settings.target_regions.secondary_regions, var.provisio_settings.target_regions.primary_region)
     error_message = "The primary region must not be included in the secondary regions."
   }
 }
