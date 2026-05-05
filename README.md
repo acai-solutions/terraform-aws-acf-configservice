@@ -1,4 +1,4 @@
-# terraform-aws-acf-configservice Terraform module
+# AWS Config - ACF Terraform Module
 
 <!-- LOGO -->
 <a href="https://acai.gmbh">    
@@ -192,7 +192,7 @@ See [LICENSE][license-url] for full details.
 <!-- COPYRIGHT -->
 <br />
 <br />
-<p align="center">Copyright &copy; 2024, 2025 ACAI GmbH</p>
+<p align="center">Copyright ACAI GmbH</p>
 
 <!-- MARKDOWN LINKS & IMAGES -->
 [acai-shield]: https://img.shields.io/badge/maintained_by-acai.gmbh-CB224B?style=flat
