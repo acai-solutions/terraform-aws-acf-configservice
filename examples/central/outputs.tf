@@ -18,3 +18,8 @@ output "member_files" {
   description = "Rendered member files."
   value       = module.member_files
 }
+
+output "test_success" {
+  description = "test success indicator (consumed by terratest)"
+  value       = true
+}

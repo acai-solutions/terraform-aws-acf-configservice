@@ -2,6 +2,7 @@
 # ¦ DATA
 # ---------------------------------------------------------------------------------------------------------------------
 data "aws_caller_identity" "current" {}
+data "aws_partition" "current" {}
 
 # ---------------------------------------------------------------------------------------------------------------------
 # ¦ AWS CONFIG ROLE
@@ -38,7 +39,7 @@ data "aws_iam_policy_document" "aws_config_role_trust_${lower(replace(primary_re
 
 resource "aws_iam_role_policy_attachment" "config_role_attachment_${lower(replace(primary_region, "-", "_"))}" {
   role       = aws_iam_role.aws_config_role_${lower(replace(primary_region, "-", "_"))}.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWS_ConfigRole"
+  policy_arn = "arn:$${data.aws_partition.current.partition}:iam::aws:policy/service-role/AWS_ConfigRole"
   depends_on = [
     aws_config_configuration_recorder.aws_config_recorder_${lower(replace(primary_region, "-", "_"))}    
   ]
@@ -73,7 +74,8 @@ data "aws_iam_policy_document" "aws_config_delivery_permission_${lower(replace(p
     ]
     resources = [
       format(
-        "arn:aws:s3:::%s",
+        "arn:%s:s3:::%s",
+        data.aws_partition.current.partition,
         "${config_s3_delivery_bucket_name}"
       )
     ]
@@ -87,7 +89,8 @@ data "aws_iam_policy_document" "aws_config_delivery_permission_${lower(replace(p
     ]
     resources = [
       format(
-        "arn:aws:s3:::%s/AWSLogs/%s/*",
+        "arn:%s:s3:::%s/AWSLogs/%s/*",
+        data.aws_partition.current.partition,
         "${config_s3_delivery_bucket_name}",
         data.aws_caller_identity.current.account_id
       )

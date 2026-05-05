@@ -11,17 +11,15 @@
 
 variable "account_ids" {
   type = object({
-    org_mgmt      = string
-    core_logging  = string
-    core_security = string
-    workload      = string
+    org_mgmt = string
+    workload = string
   })
   description = "Account IDs for the different AWS accounts."
 }
 
 variable "aws_region" {
   type        = string
-  description = "AWS region to use for all providers (primary aggregation region)."
+  description = "AWS region (primary recording region)."
   default     = "eu-central-1"
 }
 
@@ -41,10 +39,4 @@ variable "iam_role_name" {
   type        = string
   description = "IAM role name to assume in each account."
   default     = "OrganizationAccountAccessRole"
-}
-
-variable "bucket_encryption" {
-  description = "Provide 'CMK' or 'AES256'."
-  type        = string
-  default     = "CMK"
 }
