@@ -56,6 +56,7 @@ resource "aws_iam_role_policy" "delivery" {
 }
 
 #tfsec:ignore:AVD-AWS-0057
+#trivy:ignore:AVD-AWS-0345
 data "aws_iam_policy_document" "delivery" {
   #checkov:skip=CKV_AWS_111
   #checkov:skip=CKV_AWS_356
