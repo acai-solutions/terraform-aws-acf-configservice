@@ -74,8 +74,8 @@ func TestExampleComplete(t *testing.T) {
 	defer terraform.Destroy(t, terraformMember)
 	terraform.InitAndApply(t, terraformMember)
 
-	// Retrieve the 'test_success' output from the member apply
-	testSuccessOutput := terraform.Output(t, terraformMember, "test_success")
+	// Retrieve the 'test_success' output from the member apply (warnings stripped)
+	testSuccessOutput := outputClean(t, terraformMember, "test_success")
 	t.Logf("testSuccessOutput: %s", testSuccessOutput)
 
 	// Assert that 'test_success' equals "true"
