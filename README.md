@@ -12,7 +12,6 @@
 ![terraform-tested-shield]
 ![opentofu-tested-shield]  
 ![aws-tested-shield]
-![aws-esc-tested-shield]  
 ![trivy-shield]
 ![checkov-shield]
 
