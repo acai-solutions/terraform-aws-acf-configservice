@@ -290,6 +290,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "log_access_bucket" {
   rule {
     id     = "access-log-retention"
     status = "Enabled"
+    filter {}
     abort_incomplete_multipart_upload {
       days_after_initiation = 7
     }
