@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.0](https://github.com/acai-solutions/terraform-aws-acf-configservice/compare/1.2.0...1.3.0) (2026-05-06)
+
+
+### Features
+
+* support OpenTofu, ESC preparation ([#4](https://github.com/acai-solutions/terraform-aws-acf-configservice/issues/4)) ([2575d7f](https://github.com/acai-solutions/terraform-aws-acf-configservice/commit/2575d7f9966f66130ca3b5f328bcb6ee4e862ce5))
+
 ## [1.2.0](https://github.com/acai-solutions/terraform-aws-acf-configservice/compare/1.1.1...1.2.0) (2026-01-19)
 
 
