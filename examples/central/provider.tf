@@ -15,9 +15,6 @@
 provider "aws" {
   region = var.aws_region
   alias  = "org_mgmt"
-  assume_role {
-    role_arn = "arn:${var.aws_partition}:iam::${var.account_ids.org_mgmt}:role/${var.iam_role_name}"
-  }
 }
 
 provider "aws" {
