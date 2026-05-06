@@ -29,6 +29,12 @@ terraform {
 # ---------------------------------------------------------------------------------------------------------------------
 # ¦ DATA
 # ---------------------------------------------------------------------------------------------------------------------
+data "aws_partition" "current" { provider = aws.org_mgmt }
+
+data "aws_caller_identity" "org_mgmt" {
+  provider = aws.org_mgmt
+}
+
 data "aws_caller_identity" "aggregation" {
   provider = aws.core_security
 }
@@ -37,79 +43,6 @@ data "aws_caller_identity" "logging" {
   provider = aws.core_logging
 }
 
-data "aws_caller_identity" "org_mgmt" {
-  provider = aws.org_mgmt
-}
-
-# ---------------------------------------------------------------------------------------------------------------------
-# ¦ CREATE PROVISIONERS
-# ---------------------------------------------------------------------------------------------------------------------
-module "create_provisioner_aggregation" {
-  source = "../../cicd-principals/terraform/aggregation"
-
-  iam_role_settings = {
-    name = "configservice_aggregation_cicd_provisioner"
-    aws_trustee_arns = [
-      "arn:${var.aws_partition}:iam::${var.account_ids.org_mgmt}:root"
-    ]
-  }
-  providers = {
-    aws = aws.core_security
-  }
-}
-
-module "create_provisioner_delivery" {
-  source = "../../cicd-principals/terraform/delivery"
-
-  iam_role_settings = {
-    name = "configservice_delivery_cicd_provisioner"
-    aws_trustee_arns = [
-      "arn:${var.aws_partition}:iam::${var.account_ids.org_mgmt}:root"
-    ]
-  }
-  providers = {
-    aws = aws.core_logging
-  }
-}
-
-module "create_provisioner_delegation" {
-  source = "../../cicd-principals/terraform/delegation"
-
-  iam_role_settings = {
-    name = "configservice_delegation_cicd_provisioner"
-    aws_trustee_arns = [
-      "arn:${var.aws_partition}:iam::${var.account_ids.org_mgmt}:root"
-    ]
-  }
-  providers = {
-    aws = aws.org_mgmt
-  }
-}
-
-# Region-pinned providers, each assuming the corresponding provisioner role.
-provider "aws" {
-  region = var.aws_region
-  alias  = "aggregation"
-  assume_role {
-    role_arn = module.create_provisioner_aggregation.iam_role_arn
-  }
-}
-
-provider "aws" {
-  region = var.aws_region
-  alias  = "delivery"
-  assume_role {
-    role_arn = module.create_provisioner_delivery.iam_role_arn
-  }
-}
-
-provider "aws" {
-  region = var.aws_region
-  alias  = "delegation"
-  assume_role {
-    role_arn = module.create_provisioner_delegation.iam_role_arn
-  }
-}
 
 # ---------------------------------------------------------------------------------------------------------------------
 # ¦ LOCALS
