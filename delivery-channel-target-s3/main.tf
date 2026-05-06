@@ -28,6 +28,7 @@ terraform {
 # ---------------------------------------------------------------------------------------------------------------------
 data "aws_caller_identity" "current" {}
 data "aws_organizations_organization" "current" {}
+data "aws_partition" "current" {}
 
 # ---------------------------------------------------------------------------------------------------------------------
 # ¦ LOCALS
@@ -68,7 +69,7 @@ data "aws_iam_policy_document" "aws_config_bucket_cmk" {
     effect = "Allow"
     principals {
       type        = "AWS"
-      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
+      identifiers = ["arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:root"]
     }
     actions   = ["kms:*"]
     resources = ["*"]
@@ -159,6 +160,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "aws_config_bucket" {
   rule {
     id     = "Expiration"
     status = "Enabled"
+    filter {}
     abort_incomplete_multipart_upload {
       days_after_initiation = 7
     }
@@ -288,6 +290,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "log_access_bucket" {
   rule {
     id     = "access-log-retention"
     status = "Enabled"
+    filter {}
     abort_incomplete_multipart_upload {
       days_after_initiation = 7
     }
