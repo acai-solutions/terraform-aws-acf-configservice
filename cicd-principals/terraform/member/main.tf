@@ -77,6 +77,7 @@ data "aws_iam_policy_document" "member" {
       "iam:GetRolePolicy",
       "iam:ListRolePolicies",
       "iam:ListAttachedRolePolicies",
+      "iam:ListInstanceProfilesForRole",
       "iam:CreateRole",
       "iam:DeleteRole",
       "iam:UpdateRole",
