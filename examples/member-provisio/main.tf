@@ -24,38 +24,10 @@ terraform {
 }
 
 # ---------------------------------------------------------------------------------------------------------------------
-# ¦ CREATE PROVISIONER
+# ¦ DATA
 # ---------------------------------------------------------------------------------------------------------------------
-module "create_provisioner" {
-  source = "../../cicd-principals/terraform/member"
+data "aws_partition" "current" { provider = aws.org_mgmt }
 
-  iam_role_settings = {
-    name = "configservice_member_cicd_provisioner"
-    aws_trustee_arns = [
-      "arn:${var.aws_partition}:iam::${var.account_ids.org_mgmt}:root"
-    ]
-  }
-  providers = {
-    aws = aws.workload_primary
-  }
-}
-
-# Region-pinned providers, each assuming the member provisioner role inside the workload account.
-provider "aws" {
-  region = var.aws_region
-  alias  = "workload_member_primary"
-  assume_role {
-    role_arn = module.create_provisioner.iam_role_arn
-  }
-}
-
-provider "aws" {
-  region = length(var.secondary_regions) > 0 ? var.secondary_regions[0] : var.aws_region
-  alias  = "workload_member_secondary"
-  assume_role {
-    role_arn = module.create_provisioner.iam_role_arn
-  }
-}
 
 # ---------------------------------------------------------------------------------------------------------------------
 # ¦ MODULE - apply the rendered package produced by the central example
